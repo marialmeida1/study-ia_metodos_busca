@@ -1,17 +1,18 @@
 # run_experiments.py
-# Executa experimentos comparativos com DFS, BFS e A* (com 3 heurísticas) nos labirintos.
+# Executa experimentos comparativos com DFS, BFS, Greedy Search e A* (com 3 heurísticas) nos labirintos.
 import csv
 from typing import List, Dict, Any
 from maze import MAZES, MAZE_DESCRIPTIONS, get_start_and_goal
 from search.dfs import dfs
 from search.bfs import bfs
+from search.greedy_search_optimized import greedy_search
 from search.astar import astar
 from search.heuristics import HEURISTICS
 
 
 def run_experiment_on_maze(maze_id: int, allow_diagonal: bool = False) -> List[Dict[str, Any]]:
     """
-    Executa DFS, BFS e A* (com 3 heurísticas) em um labirinto específico.
+    Executa DFS, BFS, Greedy Search e A* (com 3 heurísticas) em um labirinto específico.
     
     Args:
         maze_id: ID do labirinto (1-9)
@@ -53,6 +54,22 @@ def run_experiment_on_maze(maze_id: int, allow_diagonal: bool = False) -> List[D
         'path_cost': '-',
         'path_length': result_bfs.depth if result_bfs.found else None
     })
+    
+    # Greedy Search com cada heurística
+    for heur_name, heur_func in HEURISTICS.items():
+        result_greedy = greedy_search(maze, start, goal, heur_func)
+        results.append({
+            'maze_id': maze_id,
+            'algorithm': 'Greedy',
+            'heuristic': heur_name,
+            'path_found': result_greedy.found,
+            'time_s': result_greedy.time,
+            'nodes_visited': result_greedy.nodes_visited,
+            'nodes_generated': result_greedy.nodes_generated,
+            'max_frontier_size': result_greedy.max_frontier_size,
+            'path_cost': result_greedy.path_cost,
+            'path_length': result_greedy.depth if result_greedy.found else None
+        })
     
     # A* com cada heurística
     for heur_name, heur_func in HEURISTICS.items():
@@ -140,7 +157,7 @@ def run_all_experiments(allow_diagonal: bool = False) -> List[Dict[str, Any]]:
 
 if __name__ == '__main__':
     print("="*120)
-    print("EXPERIMENTOS COMPARATIVOS: DFS, BFS e A* (Manhattan, Euclidean, Chebyshev)")
+    print("EXPERIMENTOS COMPARATIVOS: DFS, BFS, Greedy Search e A* (Manhattan, Euclidean, Chebyshev)")
     print("="*120)
     
     # Executa em todos os labirintos
