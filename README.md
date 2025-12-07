@@ -101,15 +101,6 @@ bash test_integration.sh
 8. Alta densidade de obstáculos; excelente para ver A* brilhar
 9. Grande e complexo; ideal para comparar algoritmos em larga escala
 
-## 📝 Entregáveis Atendidos
-
-✅ **Código do A*** - Implementado em `search/astar.py`  
-✅ **3 Heurísticas** - Manhattan, Euclidean, Chebyshev em `search/heuristics.py`  
-✅ **Interface de escolha** - Menu interativo em `main.py`  
-✅ **Funciona em labirintos** - Compatível com estrutura do projeto  
-✅ **Registra métricas** - Tempo, nós, profundidade, custo, fronteira  
-✅ **Resultados experimentais** - CSV em `results/all_algorithms_comparison.csv`
-
 ## 🔬 Exemplo de Análise
 
 ```python
