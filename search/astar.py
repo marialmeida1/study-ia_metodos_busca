@@ -1,10 +1,13 @@
 # astar.py
-# Implementação do A* (f = g + h) para grid. Retorna caminho e métricas.
+# Implementação do A* (f = g + h) para labirintos.
 import heapq
 import time
-from typing import Callable, Dict, List, Tuple, Optional, Set
+from typing import Callable, Dict, List, Tuple, Optional, Set, Union
+
+from utils.search import SearchResult
 
 Pos = Tuple[int,int]
+Cell = Union[str, int]
 
 class Node:
     """Nó da árvore de busca com posição, custo g, f e referência ao pai."""
@@ -38,31 +41,35 @@ def neighbors_8(pos: Pos):
     return [(x+1,y),(x-1,y),(x,y+1),(x,y-1),
             (x+1,y+1),(x+1,y-1),(x-1,y+1),(x-1,y-1)]
 
-def astar(grid: List[List[int]],
+def astar(maze: List[List[Cell]],
           start: Pos,
           goal: Pos,
           heuristic: Callable[[Pos,Pos], float],
           allow_diagonal: bool = False,
-          diag_cost: float = 1.41421356237) -> Dict:
+          diag_cost: float = 1.41421356237) -> SearchResult:
     """
-    Algoritmo A* completo para busca em grid.
+    Algoritmo A* completo para busca em labirinto.
     
     Args:
-        grid: matriz 2D onde 0=livre, 1=parede
+        maze: matriz 2D onde 0/'S'/'G'=livre, 1=parede
         start, goal: posições (linha, coluna)
         heuristic: função h(pos, goal) -> float
         allow_diagonal: permite movimentos diagonais
         diag_cost: custo do movimento diagonal (padrão √2)
     
     Returns:
-        dict com 'path' (lista de posições ou None) e 'metrics' (tempo, nós expandidos,
-        nós gerados, tamanho máximo da fronteira, custo do caminho, comprimento do caminho)
+        SearchResult com caminho, profundidade, nós visitados, tempo e métricas adicionais
     """
     t0 = time.perf_counter()
-    rows = len(grid)
-    cols = len(grid[0]) if rows>0 else 0
+    rows = len(maze)
+    cols = len(maze[0]) if rows>0 else 0
 
-    in_bounds = lambda p: 0 <= p[0] < rows and 0 <= p[1] < cols
+    def is_walkable(pos: Pos) -> bool:
+        """Verifica se a posição é válida e caminhável."""
+        if not (0 <= pos[0] < rows and 0 <= pos[1] < cols):
+            return False
+        return maze[pos[0]][pos[1]] != 1
+    
     neigh_func = neighbors_8 if allow_diagonal else neighbors_4
 
     open_heap: List[Tuple[float,int,Node]] = []
@@ -91,24 +98,21 @@ def astar(grid: List[List[int]],
         if current.pos == goal:
             t1 = time.perf_counter()
             path = reconstruct_path(current)
-            return {
-                'path': path,
-                'metrics': {
-                    'time_s': t1 - t0,
-                    'nodes_expanded': nodes_expanded,
-                    'nodes_generated': nodes_generated,
-                    'max_frontier_size': max_frontier,
-                    'path_cost': current.g,
-                    'path_length': len(path)-1  # number of moves
-                }
-            }
+            return SearchResult(
+                found=True,
+                path=path,
+                depth=len(path) - 1,
+                nodes_visited=nodes_expanded,
+                time=t1 - t0,
+                nodes_generated=nodes_generated,
+                max_frontier_size=max_frontier,
+                path_cost=current.g
+            )
 
         closed.add(current.pos)
 
         for nb in neigh_func(current.pos):
-            if not in_bounds(nb): 
-                continue
-            if grid[nb[0]][nb[1]] == 1:  # parede
+            if not is_walkable(nb):
                 continue
 
             # Custo do movimento: diagonal vs reto.
@@ -128,14 +132,13 @@ def astar(grid: List[List[int]],
 
     # Sem solução.
     t1 = time.perf_counter()
-    return {
-        'path': None,
-        'metrics': {
-            'time_s': t1 - t0,
-            'nodes_expanded': nodes_expanded,
-            'nodes_generated': nodes_generated,
-            'max_frontier_size': max_frontier,
-            'path_cost': None,
-            'path_length': None
-        }
-    }
+    return SearchResult(
+        found=False,
+        path=[],
+        depth=None,
+        nodes_visited=nodes_expanded,
+        time=t1 - t0,
+        nodes_generated=nodes_generated,
+        max_frontier_size=max_frontier,
+        path_cost=None
+    )
