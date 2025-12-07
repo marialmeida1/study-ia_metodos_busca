@@ -264,6 +264,10 @@ Compatível com análise em Python (Pandas), Excel, R, etc.
 ## 👨‍💻 Autor
 
 **Maria Almeida**  
+**Laura Menezes**
+**Gustavo Henrique**
+**Felipe Ratton**
+**Alice Salim**
 Projeto desenvolvido para disciplina de Inteligência Artificial - PUC
 
 ## 📄 Licença
