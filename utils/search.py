@@ -1,17 +1,24 @@
+# search.py
+# Utilitários compartilhados por todos os algoritmos de busca.
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Set, Union
+from typing import Dict, List, Tuple, Set, Union, Optional
 
 Position = Tuple[int, int]
 Cell = Union[str, int]
 
 @dataclass
 class SearchResult:
-    found: bool
-    path: List[Position]
-    depth: int | None
-    nodes_visited: int
-    time: float
+    """Resultado padronizado de um algoritmo de busca."""
+    found: bool  # Solução encontrada?
+    path: List[Position]  # Caminho da origem ao objetivo
+    depth: int | None  # Profundidade (número de movimentos)
+    nodes_visited: int  # Nós expandidos
+    time: float  # Tempo de execução
+    # Campos extras para A*
+    nodes_generated: Optional[int] = None  # Total de nós gerados
+    max_frontier_size: Optional[int] = None  # Tamanho máximo da fronteira
+    path_cost: Optional[float] = None # Custo total do caminho
 
 
 def get_neighbors(pos: Position, maze: List[List[Cell]]) -> List[Position]:
@@ -24,15 +31,20 @@ def get_neighbors(pos: Position, maze: List[List[Cell]]) -> List[Position]:
     cols = len(maze[0])
     r, c = pos
 
+    # Possíveis vizinhos: cima, baixo, esquerda, direita
     candidates = [
-        (r - 1, c),  
-        (r + 1, c),  
-        (r, c - 1),  
-        (r, c + 1),  
+        (r - 1, c),  # Cima
+        (r + 1, c),  # Baixo
+        (r, c - 1),  # Esquerda
+        (r, c + 1),  # Direita
     ]
 
     neighbors: List[Position] = []
     for nr, nc in candidates:
+        # Verifica limites e se não é parede (1)
+        if 0 <= nr < rows and 0 <= nc < cols:
+            if maze[nr][nc] != 1: 
+                neighbors.append((nr, nc))
         if 0 <= nr < rows and 0 <= nc < cols:
             if maze[nr][nc] != 1: 
                 neighbors.append((nr, nc))

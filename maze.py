@@ -1,7 +1,9 @@
+# maze.py
+# Definição dos 9 labirintos usados nos experimentos.
 from typing import List, Tuple, Union
 
-Position = Tuple[int, int]  
-Cell = Union[str, int]            
+Position = Tuple[int, int]  # (linha, coluna)
+Cell = Union[str, int]  # Célula pode ser 'S', 'G', 0 (livre) ou 1 (parede)
 
 MAZE_1: List[List[Cell]] = [
     ["S", 0,   0,   1,   0],
